@@ -1,0 +1,450 @@
+* { box-sizing: border-box; margin:0; padding:0; }
+    body, html { min-height: 100%; font-family: 'VT323', monospace; color: #e0e0e0; }
+    body { overflow-y: auto; background: #000; }
+
+    #bg-image {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("images.png");
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      z-index: -2;
+      filter: brightness(0.6);
+    }
+
+    .scanlines {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+      background-size: 100% 4px, 6px 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 300px 1fr 300px;
+      min-height: 100vh;
+      padding: 30px;
+    }
+
+    .center {
+      display: flex; flex-direction: column; justify-content: flex-start; align-items: center; text-align: center; height: 100%;
+    }
+
+    .time-display {
+      font-size: 6rem;
+      margin-top: 60px;
+      color: #ff3333;
+      text-shadow: 2px 2px 0px #000, 0 0 20px rgba(255, 0, 0, 0.6);
+      background: rgba(0,0,0,0.8);
+      padding: 20px 40px;
+      border: 2px solid #ff3333;
+      border-radius: 0;
+      letter-spacing: 5px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    @keyframes pomodoroFlash {
+      0%, 100% { border-color: #ff3333; box-shadow: 0 0 20px rgba(255,0,0,0.6); }
+      50% { border-color: #00ffcc; box-shadow: 0 0 30px #00ffcc; }
+    }
+    .pomodoro-flash { animation: pomodoroFlash 0.5s ease-in-out 6; }
+
+    .status-indicator {
+      margin-top: 10px;
+      font-size: 1.5rem;
+      color: #888;
+      letter-spacing: 3px;
+    }
+
+    .left {
+      display: flex; flex-direction: column; justify-content: start; height: 100%;
+      background: rgba(0,0,0,0.7);
+      padding: 15px;
+      border-right: 1px solid #333;
+    }
+
+    .saved-times {
+      flex-grow: 1; overflow-y: auto; margin-bottom: 20px;
+    }
+
+    .task-item {
+      display: block;
+      font-size: 1.4rem;
+      margin: 5px 0;
+      padding: 8px;
+      cursor: grab;
+      border-bottom: 1px dashed #444;
+      color: #ccc;
+      transition: 0.2s;
+    }
+    .task-item .task-top {
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .task-item:hover { background: rgba(255, 51, 51, 0.15); }
+    .task-item.dragging { opacity: 0.5; background: #333; }
+
+    .progress-row {
+      display: flex; align-items: center; gap: 8px; margin-top: 6px;
+    }
+    .progress-bar-bg {
+      flex-grow: 1; height: 8px; background: #222; border: 1px solid #444;
+    }
+    .progress-bar-fill {
+      height: 100%; background: #00ffcc;
+    }
+    .progress-pct {
+      font-size: 1rem; color: #00ffcc; cursor: pointer; white-space: nowrap;
+    }
+    .progress-pct:hover { text-decoration: underline; color: #fff; }
+
+    .daily-container, .total-container {
+      margin-bottom: 15px;
+      background: #000;
+      border: 1px solid #444;
+      padding: 10px;
+      text-align: center;
+    }
+    .daily-container { border-color: #00ff00; }
+    .weekly-box { border-color: #00ffcc; margin-top: auto; }
+    .total-container { border-color: #ff3333; }
+
+    .total-label {
+      display: block; font-size: 1rem; margin-bottom: 5px; color: #888; letter-spacing: 2px;
+    }
+    #dailyTotal { font-size: 2rem; color: #00ff00; font-family: 'VT323'; }
+    #weeklyTotal { font-size: 2rem; color: #00ffcc; font-family: 'VT323'; }
+    #grandTotal { font-size: 2rem; color: #ff3333; font-family: 'VT323'; }
+
+    .right {
+      display: flex; flex-direction: column; justify-content: center; align-items: stretch;
+      padding: 20px;
+      background: rgba(0,0,0,0.7);
+      border-left: 1px solid #333;
+    }
+
+    select, input {
+      padding: 12px; margin: 10px 0;
+      border: 1px solid #555;
+      border-radius: 0;
+      font-size: 1.2rem;
+      background: #111; color: #fff; font-family: 'VT323';
+      outline: none;
+      width: 100%;
+    }
+    select:focus, input:focus { border-color: #ff3333; }
+    option { background: #000; }
+
+    button {
+      padding: 12px; margin: 5px 0; border: none; font-size: 1.5rem; cursor: pointer;
+      background: #222; color: #fff; font-family: 'VT323';
+      border: 1px solid #555; transition: 0.2s; text-transform: uppercase;
+    }
+    button:hover { background: #fff; color: #000; border-color: #fff; }
+
+    .btn-group { display: flex; gap: 10px; }
+    .btn-group button { flex: 1; font-size: 1.2rem; }
+
+    #addTopicBtn:hover { background: #00ff00; border-color: #00ff00; }
+    #removeTopicBtn:hover { background: #ff3333; border-color: #ff3333; }
+
+    .main-btns { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+    #startBtn { background: rgba(0, 255, 0, 0.1); border-color: #00ff00; color: #00ff00; }
+    #startBtn:hover { background: #00ff00; color: #000; box-shadow: 0 0 15px #00ff00; }
+
+    #pauseBtn { background: rgba(255, 165, 0, 0.1); border-color: #ffa500; color: #ffa500; }
+    #pauseBtn:hover { background: #ffa500; color: #000; box-shadow: 0 0 15px #ffa500; }
+
+    #stopBtn { border-color: #ff0000; color: #ff0000; background: rgba(255, 0, 0, 0.1); }
+    #stopBtn:hover { background: #ff0000; color: #000; box-shadow: 0 0 15px #ff0000; }
+
+    #pomodoroBtn { background: rgba(0, 255, 204, 0.1); border-color: #00ffcc; color: #00ffcc; }
+    #pomodoroBtn:hover { background: #00ffcc; color: #000; box-shadow: 0 0 15px #00ffcc; }
+
+    .bottom-section {
+      width: 100%; padding: 20px; text-align: center; margin-bottom: 50px;
+    }
+    details {
+      background: #000; border: 1px solid #333; padding: 10px; display: inline-block; width: 90%;
+    }
+    summary {
+      font-size: 1.5rem; color: #ff3333; cursor: pointer; list-style: none;
+    }
+    summary:hover { color: #fff; text-decoration: underline; }
+
+    .chart-wrapper {
+      margin-top: 15px;
+      background: #111;
+      padding: 20px;
+      border: 1px solid #333;
+    }
+
+    .chart-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 15px;
+    }
+    .chart-controls button {
+      width: 50px; padding: 5px; font-size: 1.2rem; margin: 0;
+      border-color: #00ffcc; color: #00ffcc;
+    }
+    .chart-controls button:hover { background: #00ffcc; color: #000; }
+    #chartMonthLabel {
+      font-size: 1.8rem; color: #fff; min-width: 200px; text-align: center;
+    }
+
+    .canvas-container {
+      height: 500px;
+      width: 100%;
+    }
+
+    /* ---- YouTube Playlist Analyzer ---- */
+    .yt-input-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
+    .yt-input-row input { flex: 1; min-width: 200px; margin: 0; }
+    .yt-input-row button { margin: 0; border-color: #00ffcc; color: #00ffcc; background: rgba(0,255,204,0.1); white-space: nowrap; }
+    .yt-input-row button:hover { background: #00ffcc; color: #000; }
+
+    .yt-range-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
+    .yt-range-row input { flex: 1; min-width: 140px; margin: 0; }
+
+    .yt-status { color: #ff3333; font-size: 1.2rem; min-height: 24px; text-align: left; }
+
+    .yt-results { display: none; text-align: left; margin-top: 10px; }
+
+    .yt-stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 20px;
+    }
+    .yt-stat-box {
+      background: #000; border: 1px solid #444; padding: 10px; text-align: center;
+    }
+    .yt-stat-box span:last-child { display: block; font-size: 1.6rem; color: #00ffcc; margin-top: 4px; }
+
+    .yt-link-row {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;
+      border-top: 1px dashed #333; border-bottom: 1px dashed #333; padding: 15px 0;
+    }
+    .yt-link-row select, .yt-link-row input { margin: 0; width: auto; flex: 1; min-width: 150px; }
+    .yt-link-row .total-label { margin: 0; }
+    .yt-link-row button { margin: 0; border-color: #00ff00; color: #00ff00; background: rgba(0,255,0,0.1); }
+    .yt-link-row button:hover { background: #00ff00; color: #000; }
+
+    .yt-schedule-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+    .yt-schedule-controls input, .yt-schedule-controls select { margin: 5px 0 15px 0; }
+    .yt-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .yt-days-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 15px; }
+    .yt-days-row label { cursor: pointer; }
+    .yt-days-row input { display: none; }
+    .yt-days-row span {
+      display: inline-block; padding: 6px 10px; border: 1px solid #444; font-size: 1rem; color: #888;
+    }
+    .yt-days-row input:checked + span { background: #ff3333; color: #000; border-color: #ff3333; }
+
+    .yt-checkbox-label { display: flex; align-items: center; gap: 8px; font-size: 1.1rem; color: #ccc; cursor: pointer; }
+    .yt-checkbox-label input { width: auto; margin: 0; }
+
+    .yt-ring-box { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
+    .yt-ring-wrap { position: relative; width: 160px; height: 160px; }
+    .yt-ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .yt-ring-center {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    #ytSchedPct { font-size: 2rem; color: #fff; }
+    #ytSchedVideos { font-size: 1rem; color: #888; }
+    .yt-finish-info { text-align: center; }
+    .yt-finish-info .total-label { display: block; }
+    #ytSchedDate { font-size: 1.4rem; color: #00ffcc; display: block; }
+    .yt-days-note { font-size: 1rem; color: #888; display: block; }
+
+    @media (max-width: 700px) {
+      .yt-schedule-grid { grid-template-columns: 1fr; }
+    }
+
+    .yt-daily-plan {
+      margin-top: 25px;
+      border-top: 1px dashed #333;
+      padding-top: 15px;
+    }
+    .yt-daily-plan-header { margin-bottom: 10px; }
+    .yt-daily-plan-header .yt-daily-plan-sub { font-size: 0.95rem; color: #888; }
+    .yt-daily-plan-scroll { max-height: 320px; overflow-y: auto; border: 1px solid #333; }
+    .yt-daily-plan-table { width: 100%; border-collapse: collapse; font-size: 1.15rem; }
+    .yt-daily-plan-table th {
+      position: sticky; top: 0; background: #111; color: #888; text-align: left;
+      padding: 8px 10px; border-bottom: 1px solid #333; font-weight: normal; letter-spacing: 1px;
+    }
+    .yt-daily-plan-table td {
+      padding: 8px 10px; border-bottom: 1px dashed #333; color: #ccc;
+    }
+    .yt-daily-plan-table tr:hover td { background: rgba(255, 51, 51, 0.08); }
+
+/* --- Optional YouTube API setup --- */
+.yt-api-settings {
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed #333;
+}
+.yt-api-settings .yt-input-row { margin: 6px 0; }
+.yt-api-settings #ytApiKey { min-width: 170px; }
+.yt-key-help { font-size: 1rem; color: #aaa; text-align: left; line-height: 1.4; }
+.yt-key-help a { color: #00ffcc; text-underline-offset: 3px; }
+.yt-key-help a:hover { color: #fff; }
+
+/* --- Smaller screens --- */
+@media (max-width: 1050px) {
+  .container { grid-template-columns: 1fr; gap: 22px; padding: 18px; }
+  .center { order: 0; min-height: 160px; }
+  .right { order: 1; border-left: 0; border: 1px solid #333; }
+  .left { order: 2; border-right: 0; border: 1px solid #333; }
+  .time-display { font-size: clamp(3rem, 12vw, 6rem); margin-top: 12px; padding: 15px 20px; }
+  .bottom-section { padding: 14px; margin-bottom: 18px; }
+  details { width: 100%; }
+  .canvas-container { height: 300px; }
+}
+
+@media (max-width: 480px) {
+  .container { padding: 10px; gap: 12px; }
+  .right, .left { padding: 12px; }
+  .bottom-section { padding: 10px; }
+  .chart-wrapper { padding: 10px; }
+  .yt-two-col { grid-template-columns: 1fr; }
+  .time-display { letter-spacing: 2px; }
+  .chart-controls { gap: 8px; }
+  #chartMonthLabel { min-width: 0; }
+}
+
+/* Storage permission notice on browsers that block file:// persistence. */
+.storage-notice {
+  max-width: 600px; margin: 12px auto; padding: 8px 12px;
+  color: #ffa500; border: 1px dashed #ffa500;
+  font-size: 1.1rem; line-height: 1.3; text-align: center;
+}
+
+
+/* ===== MOBILE RESPONSIVE ===== */
+
+@media (max-width: 700px) {
+
+    .container {
+        display: flex;
+        flex-direction: column;
+        min-height: auto;
+        padding: 12px;
+        gap: 16px;
+    }
+
+    .center {
+        order: 0;
+        height: auto;
+        min-height: 0;
+        width: 100%;
+    }
+
+    .time-display {
+        font-size: clamp(2.5rem, 11vw, 5rem);
+        width: 100%;
+        margin-top: 10px;
+        padding: 15px 5px;
+        letter-spacing: 1px;
+        white-space: nowrap;
+    }
+
+    .right {
+        order: 1;
+        width: 100%;
+        padding: 15px;
+    }
+
+    .left {
+        order: 2;
+        width: 100%;
+        height: auto;
+        padding: 15px;
+    }
+
+    .saved-times {
+        max-height: 350px;
+        overflow-y: auto;
+    }
+
+    select, input, button {
+        max-width: 100%;
+    }
+
+    .main-btns {
+        gap: 6px;
+    }
+
+    .bottom-section {
+        padding: 10px;
+        margin-bottom: 20px;
+    }
+
+    details {
+        width: 100%;
+    }
+
+    .chart-wrapper {
+        padding: 10px;
+    }
+
+    .canvas-container {
+        height: 260px;
+    }
+
+    .yt-schedule-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .yt-input-row input {
+        min-width: 0;
+        width: 100%;
+        flex-basis: 100%;
+    }
+
+    .yt-input-row button {
+        width: 100%;
+    }
+
+    .yt-link-row select,
+    .yt-link-row input {
+        flex-basis: 100%;
+        min-width: 0;
+    }
+
+    .yt-range-row input {
+        min-width: 0;
+    }
+
+    .yt-daily-plan-scroll {
+        overflow-x: auto;
+    }
+
+    .yt-daily-plan-table {
+        min-width: 420px;
+    }
+
+    #chartMonthLabel {
+        min-width: 0;
+        font-size: 1.4rem;
+    }
+}
+
+@media (max-width: 360px) {
+
+    .time-display {
+        font-size: 2.4rem;
+        letter-spacing: 0;
+    }
+
+    .chart-controls {
+        gap: 5px;
+    }
+}

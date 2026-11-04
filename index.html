@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404! Timer</title>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23000'/%3E%3Ctext x='32' y='43' text-anchor='middle' font-size='27' fill='%23ff3333' font-family='monospace'%3E404%3C/text%3E%3C/svg%3E">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="scanlines"></div>
+
+  <!-- Optional background video: add your own licensed file as mr.mp4. -->
+  <div id="bg-image" aria-hidden="true"></div>
+
+  <div class="container">
+    <div class="left">
+      <div class="saved-times" id="savedTimes"></div>
+
+      <div class="daily-container">
+        <span class="total-label">DAILY_LOG</span>
+        <span id="dailyTotal">00:00:00</span>
+      </div>
+
+      <div class="daily-container weekly-box">
+        <span class="total-label">WEEKLY_LOG</span>
+        <span id="weeklyTotal">00:00:00</span>
+      </div>
+
+      <div class="total-container">
+        <span class="total-label">SYSTEM_TOTAL</span>
+        <span id="grandTotal">00:00:00</span>
+      </div>
+    </div>
+
+    <div class="center">
+      <div class="time-display" id="display">00:00:00</div>
+      <div class="status-indicator" id="statusIndicator">IDLE</div>
+      <p id="storageNotice" class="storage-notice" hidden></p>
+    </div>
+
+    <div class="right">
+      <select id="fieldSelect"></select>
+
+      <div class="topic-controls">
+        <input type="text" id="newTopic" placeholder="> Input Protocol...">
+        <input type="number" id="newTopicLessons" placeholder="> Total Lessons (optional)" min="0">
+        <div class="btn-group">
+          <button id="addTopicBtn">INIT</button>
+          <button id="removeTopicBtn">PURGE</button>
+        </div>
+      </div>
+
+      <div class="main-btns">
+        <button id="startBtn">EXECUTE</button>
+        <button id="pauseBtn" class="pause-btn">SUSPEND</button>
+        <button id="stopBtn">HALT</button>
+        <button id="resetBtn">FLUSH</button>
+        <button id="pomodoroBtn">POMODORO: OFF</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-section">
+    <details open>
+      <summary>> ACCESS ANALYTICS DATA</summary>
+      <div class="chart-wrapper">
+        <div class="chart-controls">
+          <button id="prevMonthBtn">&lt;&lt;</button>
+          <span id="chartMonthLabel">LOADING...</span>
+          <button id="nextMonthBtn">&gt;&gt;</button>
+        </div>
+        <div class="canvas-container">
+          <canvas id="studyChart"></canvas>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <div class="bottom-section">
+    <details open>
+      <summary>> YOUTUBE PLAYLIST ANALYZER</summary>
+      <div class="chart-wrapper">
+
+        <div class="yt-api-settings">
+          <label for="ytApiKey" class="total-label">YOUTUBE DATA API KEY</label>
+          <div class="yt-input-row">
+            <input type="password" id="ytApiKey" placeholder="> Paste your API key (not saved in code)" autocomplete="off" spellcheck="false">
+            <button type="button" id="ytClearKeyBtn">CLEAR KEY</button>
+          </div>
+          <p class="yt-key-help">Only needed for YouTube playlist analysis. The key is not included in the source code. For website-restricted keys, use the GitHub Pages version rather than opening a local file. <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer">Get an API key ↗</a></p>
+        </div>
+        <div class="yt-input-row">
+          <input type="text" id="ytPlaylistUrl" placeholder="> Paste YouTube playlist URL or ID...">
+          <button id="ytAnalyzeBtn">ANALYZE</button>
+        </div>
+        <div class="yt-range-row">
+          <input type="number" id="ytRangeStart" placeholder="> Range start (optional)" min="1">
+          <input type="number" id="ytRangeEnd" placeholder="> Range end (optional)" min="1">
+        </div>
+        <div id="ytStatus" class="yt-status"></div>
+
+        <div id="ytResults" class="yt-results">
+          <div class="yt-stats-grid">
+            <div class="yt-stat-box"><span class="total-label">VIDEOS</span><span id="ytVideoCount">0</span><span id="ytRangeLabel" style="display:block;font-size:0.85rem;color:#888;margin-top:2px;"></span></div>
+            <div class="yt-stat-box"><span class="total-label">TOTAL (1x)</span><span id="ytTotalDuration">--</span></div>
+            <div class="yt-stat-box"><span class="total-label">AT 1.25x</span><span id="yt125x">--</span></div>
+            <div class="yt-stat-box"><span class="total-label">AT 1.5x</span><span id="yt15x">--</span></div>
+            <div class="yt-stat-box"><span class="total-label">AT 2x</span><span id="yt2x">--</span></div>
+          </div>
+
+          <div class="yt-link-row">
+            <label class="total-label">LINK TO TOPIC</label>
+            <select id="ytLinkTopic"></select>
+            <label class="total-label">ALREADY WATCHED (VIDEOS)</label>
+            <input type="number" id="ytWatchedCount" min="0" value="0">
+            <button id="ytSaveToTopicBtn">SAVE TO TOPIC</button>
+          </div>
+
+          <div class="yt-schedule-grid">
+            <div class="yt-schedule-controls">
+              <div class="yt-two-col">
+                <div>
+                  <label class="total-label">HOURS/DAY</label>
+                  <input type="number" id="ytSchedHours" min="0" max="24" value="1">
+                </div>
+                <div>
+                  <label class="total-label">MINUTES/DAY</label>
+                  <input type="number" id="ytSchedMinutes" min="0" max="59" value="0">
+                </div>
+              </div>
+
+              <label class="total-label">STUDY DAYS</label>
+              <div class="yt-days-row">
+                <label><input type="checkbox" class="yt-sched-day" value="1" checked><span>MON</span></label>
+                <label><input type="checkbox" class="yt-sched-day" value="2" checked><span>TUE</span></label>
+                <label><input type="checkbox" class="yt-sched-day" value="3" checked><span>WED</span></label>
+                <label><input type="checkbox" class="yt-sched-day" value="4" checked><span>THU</span></label>
+                <label><input type="checkbox" class="yt-sched-day" value="5" checked><span>FRI</span></label>
+                <label><input type="checkbox" class="yt-sched-day" value="6" checked><span>SAT</span></label>
+                <label><input type="checkbox" class="yt-sched-day" value="0" checked><span>SUN</span></label>
+              </div>
+
+              <label class="total-label">PLAYBACK SPEED</label>
+              <select id="ytSchedSpeed">
+                <option value="1">1.00x</option>
+                <option value="1.25">1.25x</option>
+                <option value="1.5">1.50x</option>
+                <option value="1.75">1.75x</option>
+                <option value="2">2.00x</option>
+              </select>
+
+              <label class="yt-checkbox-label"><input type="checkbox" id="ytStartToday" checked> INCLUDE TODAY</label>
+            </div>
+
+            <div class="yt-ring-box">
+              <div class="yt-ring-wrap">
+                <svg viewBox="0 0 120 120" class="yt-ring-svg">
+                  <circle cx="60" cy="60" r="52" fill="none" stroke="#333" stroke-width="10"/>
+                  <circle id="ytSchedRing" cx="60" cy="60" r="52" fill="none" stroke="#00ffcc" stroke-width="10" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7"/>
+                </svg>
+                <div class="yt-ring-center">
+                  <span id="ytSchedPct">0%</span>
+                  <span id="ytSchedVideos">0/0</span>
+                </div>
+              </div>
+              <div class="yt-finish-info">
+                <span class="total-label">FINISH DATE</span>
+                <span id="ytSchedDate">--</span>
+                <span id="ytSchedDays" class="yt-days-note">--</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="ytDailyPlanWrapper" class="yt-daily-plan" style="display:none;">
+            <div class="yt-daily-plan-header">
+              <span class="total-label" style="font-size:1.2rem;">DAILY PLAN</span>
+              <div class="yt-daily-plan-sub">What to watch each day, based on your schedule.</div>
+            </div>
+            <div class="yt-daily-plan-scroll">
+              <table class="yt-daily-plan-table">
+                <thead>
+                  <tr><th>DATE</th><th>DAY</th><th>VIDEOS</th><th>WATCH TIME</th></tr>
+                </thead>
+                <tbody id="ytDailyPlanBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </details>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
