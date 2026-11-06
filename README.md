@@ -1,4 +1,3 @@
-<img width="956" height="617" alt="image" src="https://github.com/user-attachments/assets/3ed2999b-4b1d-4e46-bd2e-1462845511eb" /># 404! Timer
 
 A retro-style study timer I created with AI assistance to track study sessions, manage topics, and plan my learning.
 
