@@ -1,4 +1,4 @@
-# 404! Timer
+<img width="956" height="617" alt="image" src="https://github.com/user-attachments/assets/3ed2999b-4b1d-4e46-bd2e-1462845511eb" /># 404! Timer
 
 A retro-style study timer I created with AI assistance to track study sessions, manage topics, and plan my learning.
 
@@ -15,7 +15,17 @@ It started as a simple timer and gradually grew as I kept adding features I want
 - View study history in a monthly chart.
     
 - Analyze YouTube playlists and generate study schedules.
-    
+
+### Focus Dashboard
+<img width="1892" height="893" alt="focus-dashboard" src="https://github.com/user-attachments/assets/ab97517b-8c42-40ee-aaf3-dc2ad982bfff" />
+
+### Study Analytics
+<img width="1887" height="905" alt="study-analytics" src="https://github.com/user-attachments/assets/ddba2436-462c-4407-81b6-a6696d153e3a" />
+
+
+### YouTube Playlist Analyzer
+<img width="1891" height="900" alt="playlist-analyzer" src="https://github.com/user-attachments/assets/5d29d75b-cbfd-477a-b78d-9e467183c2bb" />
+
 
 ## Tech Stack
 
